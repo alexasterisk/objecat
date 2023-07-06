@@ -1,5 +1,11 @@
 local defaultProps = require(script.defaultProps)
 
+local children = "__children__"
+
+local function event(eventName: string): string
+	return "__event_" .. eventName .. "__"
+end
+
 local function capitalize(str: string): string
 	local split = string.split(str, "")
 	local table_ = table.create(#split)
@@ -9,29 +15,12 @@ local function capitalize(str: string): string
 	return table.concat(table_, "")
 end
 
-local children = "__children__"
-
-local function event(eventName: string): string
-	return "__event_" .. eventName .. "__"
-end
-
-local function create(className: string, properties: { [string]: any }): Instance
+local function applyProperties(instance: Instance, properties: { [string]: any}?): Instance
 	if not properties then
 		properties = {}
 	end
 
 	local cleanupTasks = {}
-
-	local success, instance = pcall(Instance.new, Instance, className)
-	if not success then
-		error("Invalid ClassName: " .. className)
-	end
-
-	if defaultProps[className] then
-		for key, value in defaultProps[className] do
-			instance[key] = value
-		end
-	end
 
 	for key, value in properties do
 		if key == children then
@@ -39,15 +28,9 @@ local function create(className: string, properties: { [string]: any }): Instanc
 				for _, child in value do
 					assert(typeof(child) == "Instance", "Child must be an instance")
 					child.Parent = instance
-					table.insert(cleanupTasks, function()
-						child:Destroy()
-					end)
 				end
 			elseif typeof(value) == "Instance" then
 				value.Parent = instance
-				table.insert(cleanupTasks, function()
-					value:Destroy()
-				end)
 			end
 		elseif string.match(key, "__event_") then
 			local eventName = string.split(key, "_")[4]
@@ -55,7 +38,7 @@ local function create(className: string, properties: { [string]: any }): Instanc
 			assert(type(value) == "function", "Event must be a function")
 
 			local event_: RBXScriptSignal | nil = instance[capitalize(eventName)]
-			assert(event_, "Event does not exist for ClassName " .. className)
+			assert(event_, "Event does not exist for ClassName " .. instance.ClassName)
 
 			local connection = event_:Connect(value)
 			table.insert(cleanupTasks, function()
@@ -74,6 +57,10 @@ local function create(className: string, properties: { [string]: any }): Instanc
 		for _, task in cleanupTasks do
 			task()
 		end
+
+		for _, descendant in instance:GetDescendants() do
+			descendant:Destroy()
+		end
 	end)
 
 	table.insert(cleanupTasks, function()
@@ -83,8 +70,37 @@ local function create(className: string, properties: { [string]: any }): Instanc
 	return instance
 end
 
+local function clone(instance: Instance, properties: { [string]: any }): Instance
+	assert(typeof(instance) == "Instance", "Instance must be an instance")
+	local newInstance = instance:Clone()
+
+	if properties and not properties.parent then
+		properties.parent = instance.Parent
+	end
+
+	applyProperties(newInstance, properties)
+	return newInstance
+end
+
+local function create(className: string, properties: { [string]: any }): Instance
+	local success, instance = pcall(Instance.new, Instance, className)
+	if not success then
+		error("Invalid ClassName: " .. className)
+	end
+
+	if defaultProps[className] then
+		for key, value in defaultProps[className] do
+			instance[key] = value
+		end
+	end
+
+	applyProperties(instance, properties)
+	return instance
+end
+
 return {
 	event = event,
+	clone = clone,
 	create = create,
 	children = children,
 	default = create

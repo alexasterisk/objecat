@@ -4,7 +4,7 @@
 </div>
 <div>&nbsp;</div>
 
-Objecat is a very simple library coming with only two functions and one variable. It is used to create Instances in a less verbose way. To put it simply, making an Instance on Roblox and setting its properties is ugly. Objecat makes it less ugly.
+Objecat is a very simple library coming with only three functions and one variable. It is used to create Instances in a less verbose way. To put it simply, making an Instance on Roblox and setting its properties is ugly. Objecat makes it less ugly.
 
 Objecat uses standard naming conventions when it comes to properties and methods. Property names and method names are in `camelCase`. This currently does not apply to *after* it is created, only on creation, this may be changed in a future release.
 
@@ -27,6 +27,7 @@ Then run `wally install` in your terminal.
 
 ### Installation Using NPM
 If you're using roblox-ts, this will be the preferred way to download it.
+It's worth noting that using the roblox-ts package that it is fully type-safe. This currently is not in effect for events, but will be in a future release.
 
 ```bash
 npm install @rbxts/objecat
@@ -123,6 +124,35 @@ const part = create("Part", {
 	[children]: [
 		create("PointLight")
 	],
+});
+```
+
+### `clone(instance: Instance, properties?: table): Instance`
+`clone<T extends Instance>(instance: T, properties?: ObjecatWritableProperties<T>): T`
+
+`clone()` is a function that clones an Instance and returns the clone. If `properties.parent` is not set, it will default to the parent of the Instance being cloned. The properties table works the same as the `create()` method. Also, when making a clone it will automatically bind all descendants to a clean-up task.
+
+```lua
+local clone = Objecat.clone
+
+local part = create("Part", {
+	anchored = true
+})
+
+local newPart = clone(part, {
+	color = Color3.fromRGB(255, 0, 0)
+})
+```
+
+```ts
+import { create, clone } from "@rbxts/objecat";
+
+const part = create("part", {
+	anchored: true,
+});
+
+const newPart = clone(part, {
+	color: Color3.fromRGB(255, 0, 0),
 });
 ```
 

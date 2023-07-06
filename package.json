@@ -1,6 +1,6 @@
 {
   "name": "@rbxts/objecat",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Yet Another Way To Create Instances",
   "main": "out/init.lua",
   "scripts": {

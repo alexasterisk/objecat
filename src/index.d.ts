@@ -14,6 +14,10 @@ export type ObjecatWritableProperties<T extends Instance> = Partial<
 
 export const children: "__children";
 export function event<K extends string>(eventName: K): `__event_${Uncapitalize<K>}__`;
+export function clone<T extends Instance>(
+	instance: T,
+	properties?: ObjecatWritableProperties<T>
+): T;
 export function create<T extends keyof CreatableInstances>(
 	className: T,
 	properties?: ObjecatWritableProperties<Instances[T]>
