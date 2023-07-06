@@ -1,0 +1,11 @@
+[package]
+name = "alexinite/objecat"
+version = "1.0.0"
+license = "ISC"
+authors = ["alexasterisk"]
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+
+exclude = ["src", "node_modules", ".vscode", ".editorconfig", ".eslintrc", ".gitignore", ".prettierrc", "aftman.toml", "package-lock.json", "package.json", "selene.toml", "stylua.toml", "tsconfig.json"]
+
+[dependencies]
