@@ -3,7 +3,7 @@ export type ObjecatWritableProperties<T extends Instance> = Partial<
 		  [K in keyof WritableInstanceProperties<T> as Uncapitalize<string & K>]: WritableInstanceProperties<T>[K];
 	  }
 	| {
-		  __children?: Instance[] | Instance;
+		  __children__?: Instance[] | Instance;
 	  }
 	| {
 		  [K in InstanceEventNames<T> as `__event_${Uncapitalize<string & K>}__`]: T[K] extends RBXScriptSignal<infer C>
@@ -12,7 +12,7 @@ export type ObjecatWritableProperties<T extends Instance> = Partial<
 	  }
 >;
 
-export const children: "__children";
+export const children: "__children__";
 export function event<K extends string>(eventName: K): `__event_${Uncapitalize<K>}__`;
 export function clone<T extends Instance>(
 	instance: T,
